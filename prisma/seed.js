@@ -1,19 +1,20 @@
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcrypt");
+require("dotenv").config();
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  datasourceUrl: process.env.DATABASE_URL,
+});
 
 async function main() {
   const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
 
-  // delete existing in correct order (child -> parent)
   await prisma.stock.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
   await prisma.warehouse.deleteMany();
   await prisma.user.deleteMany();
 
-  // create users
   const adminPassword = await bcrypt.hash("Admin@12345", saltRounds);
   const userPassword = await bcrypt.hash("User@12345", saltRounds);
 
@@ -44,7 +45,6 @@ async function main() {
     },
   });
 
-  // categories
   const cat1 = await prisma.category.create({
     data: { name: "Electronics", description: "Gadgets and devices" },
   });
@@ -55,7 +55,6 @@ async function main() {
     data: { name: "Furniture", description: "Office furniture" },
   });
 
-  // warehouses
   const wh1 = await prisma.warehouse.create({
     data: { name: "Central Warehouse", location: "Makassar" },
   });
@@ -63,7 +62,6 @@ async function main() {
     data: { name: "Regional Warehouse", location: "Jakarta" },
   });
 
-  // products
   const p1 = await prisma.product.create({
     data: {
       name: "Wireless Mouse",
@@ -94,7 +92,6 @@ async function main() {
     },
   });
 
-  // stocks
   await prisma.stock.createMany({
     data: [
       { productId: p1.id, warehouseId: wh1.id, quantity: 100 },
