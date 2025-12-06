@@ -43,7 +43,7 @@ app.use((_, res) => {
   });
 });
 
-// Global error handler
+//error handler
 app.use(errorHandler);
 
 const port = process.env.PORT || 3000;
